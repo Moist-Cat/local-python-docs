@@ -8,6 +8,17 @@ from bs4 import BeautifulSoup as bs
 
 session = Session()
 
+LINKS_FILE = 'dumps.txt'
+
+def load_links(path=LINKS_FILE):
+    with open(path) as file:
+        data = file.read()
+    return data.split("\n")
+
+def dump_link(link, path=LINKS_FILE):
+    with open(path, 'a') as file:
+        file.write(link + "\n")
+
 def get_file(url, remote_file):
     file_name = url.split('/')[-1]
     o = urlparse(url)
@@ -56,8 +67,10 @@ def link_collect(url):
                	#Used to get details about the link such as the host name, url, etc.
                 o = urlparse(urljoin(url,temp))
                 if o.netloc == 'docs.python.org':
-                    if o.geturl() not in visited:
+                    url = o.geturl()
+                    if url not in visited:
                         link.append(o.geturl())
+                        dump_link(url)
             ext_files = soup.find_all('link') + soup.find_all('script')
             for j in ext_files:
                 try:
@@ -72,15 +85,19 @@ def link_collect(url):
                     continue
                 else:
                     link.append(temp1)
+                    dump_link(temp1)
 
 
 
 if __name__ == "__main__":
-    location = '/var/www/pydocs/'                                         #Location for the local copy
-    link = deque()                                                        #A python Queue data structure
-    link.append('http://docs.python.org/tutorial/datastructures.html')    #The starting point for the crawler
-    visited = []                                                          #List of visited links
-
+    location = '/var/www/pydocs/'
+    link = deque()
+    old_links = load_links()
+    if any(old_links):
+        link.extend(old_links)
+    else:
+        link.append('http://docs.python.org/tutorial/datastructures.html')
+    visited = []
     while (link):
         print(link[0])
         i = link_collect(link[0])
