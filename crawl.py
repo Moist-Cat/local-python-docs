@@ -119,11 +119,12 @@ def link_collect(url):
                 if o.netloc == 'docs.python.org':
                     u = o.geturl()
                     if u not in visited:
-                        print(f"Added {u} to the queue")
-                        if len(link) < 10000:
+                        if u not in links:
+                            print(f"Added {u} to the queue")
                             link.add(u)
                             dump_link(u, "dumps.txt")
                         else:
+                            print(f"Collected duplicate- {u}")
                             link_collect(u)
 
     ext_files = soup.find_all('link') + soup.find_all('script')
@@ -138,11 +139,19 @@ def link_collect(url):
         temp1 = urljoin(url, temp)
         if temp1 in visited:
             continue
-        if len(link) > 10000:
+        if temp.startswith("_static"):
             link_collect(temp1)
-        else:
+            print(f"Collected static {temp1}")
+            continue
+        print(f"Added {u} to the queue")
+        if temp1 not in link:
             link.add(temp1)
             dump_link(temp1, "dumps.txt")
+        else:
+            # it's already there
+            # collect the duplicate
+            link_collect(temp1)
+            print(f"Collected duplicate {temp1}")
 
 if __name__ == "__main__":
     location = '/var/www/pydocs/'
