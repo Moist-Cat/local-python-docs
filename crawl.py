@@ -168,6 +168,7 @@ if __name__ == "__main__":
     if any(already_visited):
         visited.update(already_visited)
     while True:
+        time.sleep(1)
         try:
             l = next(iter(link))
         except IndexError:
