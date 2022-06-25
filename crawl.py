@@ -119,7 +119,7 @@ def link_collect(url):
                 if o.netloc == 'docs.python.org':
                     u = o.geturl()
                     if u not in visited:
-                        if u not in links:
+                        if u not in link:
                             print(f"Added {u} to the queue")
                             link.add(u)
                             dump_link(u, "dumps.txt")
@@ -139,11 +139,11 @@ def link_collect(url):
         temp1 = urljoin(url, temp)
         if temp1 in visited:
             continue
-        if temp.startswith("_static"):
+        if temp.startswith("_static") and temp not in link:
             link_collect(temp1)
             print(f"Collected static {temp1}")
             continue
-        print(f"Added {u} to the queue")
+        print(f"Added {temp1} to the queue")
         if temp1 not in link:
             link.add(temp1)
             dump_link(temp1, "dumps.txt")
@@ -157,9 +157,9 @@ if __name__ == "__main__":
     location = '/var/www/pydocs/'
 
     link = set() 
-    links = load_links("dumps.txt")
-    if any(links):
-        link.update(links)
+    _link = load_links("dumps.txt")
+    if any(_link):
+        link.update(_link)
     else:
         link.add('http://docs.python.org/tutorial/datastructures.html')
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     if any(already_visited):
         visited.update(already_visited)
     while True:
-        time.sleep(1)
+        time.sleep(0.2)
         try:
             l = next(iter(link))
         except IndexError:
